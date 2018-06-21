@@ -1,0 +1,115 @@
+#! /usr/bin/env python
+import string
+
+class ChessBoard:
+	def __init__(self,setupType):
+		self.squares = [['e','e','e','e','e','e','e','e'],\
+						['e','e','e','e','e','e','e','e'],\
+						['e','e','e','e','e','e','e','e'],\
+						['e','e','e','e','e','e','e','e'],\
+						['e','e','e','e','e','e','e','e'],\
+						['e','e','e','e','e','e','e','e'],\
+						['e','e','e','e','e','e','e','e'],\
+						['e','e','e','e','e','e','e','e']]
+						
+		if setupType == 0:
+			self.squares[0] = ['bR','bT','bB','bQ','bK','bB','bT','bR']
+			self.squares[1] = ['bP','bP','bP','bP','bP','bP','bP','bP']
+			self.squares[2] = ['e','e','e','e','e','e','e','e']
+			self.squares[3] = ['e','e','e','e','e','e','e','e']
+			self.squares[4] = ['e','e','e','e','e','e','e','e']
+			self.squares[5] = ['e','e','e','e','e','e','e','e']
+			self.squares[6] = ['wP','wP','wP','wP','wP','wP','wP','wP']
+			self.squares[7] = ['wR','wT','wB','wQ','wK','wB','wT','wR']
+
+		#Debugging set-ups
+		#Testing IsLegalMove
+		if setupType == 1:
+			self.squares[0] = ['bR','bT','bB','bQ','bK','bB','bT','bR']
+			self.squares[1] = ['e','e','e','e','e','e','e','e']
+			self.squares[2] = ['e','e','e','e','e','e','e','e']
+			self.squares[3] = ['e','e','e','e','e','e','e','e']
+			self.squares[4] = ['e','e','e','e','e','e','e','e']
+			self.squares[5] = ['e','e','e','e','e','e','e','e']
+			self.squares[6] = ['wP','wP','wP','wP','wP','wP','wP','wP']
+			self.squares[7] = ['wR','wT','wB','wQ','wK','wB','wT','wR']
+
+		#Testing IsInCheck, Checkmate
+		if setupType == 2:
+			self.squares[0] = ['e','e','e','e','e','e','e','e']
+			self.squares[1] = ['e','e','e','e','e','e','e','e']
+			self.squares[2] = ['e','e','e','e','bK','e','e','e']
+			self.squares[3] = ['e','e','e','e','bR','e','e','e']
+			self.squares[4] = ['e','e','bB','e','e','e','wR','e']
+			self.squares[5] = ['e','e','e','e','e','e','e','e']
+			self.squares[6] = ['wB','e','e','e','e','e','e','e']
+			self.squares[7] = ['e','e','e','wK','wQ','e','wT','e']
+
+	def GetState(self):
+		return self.squares
+
+	def ConvertToAlgebraicNotation(self,(row,col)):
+		#Converts (row,col) to algebraic notation
+		#(row,col) format used in Python Chess code starts at (0,0) in the upper left.
+		#Algebraic notation starts in the lower left and uses "a..h" for the column.
+		return self.ConvertToAlgebraicNotation_row(row) + self.ConvertToAlgebraicNotation_col(col)
+	
+	def ConvertToAlgebraicNotation_row(self,row):
+		#(row,col) format used in Python Chess code starts at (0,0) in the upper left.
+		#Algebraic notation starts in the lower left and uses "a..h" for the column.	
+		B = ['8','7','6','5','4','3','2','1']
+		return B[row]
+		
+	def ConvertToAlgebraicNotation_col(self,col):
+		#(row,col) format used in Python Chess code starts at (0,0) in the upper left.
+		#Algebraic notation starts in the lower left and uses "a..h" for the column.	
+		A = ['a','b','c','d','e','f','g','h']
+		return A[col]
+		
+	def GetFullString(self,p):
+		if 'b' in p:
+			name = "black "
+		else:
+			name = "white "
+			
+		if 'P' in p:
+			name = name + "pawn"
+		if 'R' in p:
+			name = name + "rook"
+		if 'T' in p:
+			name = name + "knight"
+		if 'B' in p:
+			name = name + "bishop"
+		if 'Q' in p:
+			name = name + "queen"
+		if 'K' in p:
+			name = name + "king"
+			
+		return name
+	
+	def MovePiece(self,moveTuple):
+		fromSquare_r = moveTuple[0][0]
+		fromSquare_c = moveTuple[0][1]
+		toSquare_r = moveTuple[1][0]
+		toSquare_c = moveTuple[1][1]
+
+		fromPiece = self.squares[fromSquare_r][fromSquare_c]
+		toPiece = self.squares[toSquare_r][toSquare_c]
+
+		self.squares[toSquare_r][toSquare_c] = fromPiece
+		self.squares[fromSquare_r][fromSquare_c] = 'e'
+
+		fromPiece_fullString = self.GetFullString(fromPiece)
+		toPiece_fullString = self.GetFullString(toPiece)
+		
+		if toPiece == 'e':
+			messageString = fromPiece_fullString+ " moves from "+self.ConvertToAlgebraicNotation(moveTuple[0])+\
+						    " to "+self.ConvertToAlgebraicNotation(moveTuple[1])
+		else:
+			messageString = fromPiece_fullString+ " from "+self.ConvertToAlgebraicNotation(moveTuple[0])+\
+						" captures "+toPiece_fullString+" at "+self.ConvertToAlgebraicNotation(moveTuple[1])+"!"
+		
+		#capitalize first character of messageString
+		messageString = string.upper(messageString[0])+messageString[1:len(messageString)]
+		
+		return messageString
